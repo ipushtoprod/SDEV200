@@ -1,13 +1,13 @@
 public class Converter {
-
+    /** Returns a double of meters given feet */
     public static double feetToMeter(double feet) {
         return 0.305 * feet;
     }
-
+    /** Returns a double of feet given meters */
     public static double meterToFeet(double meter) {
         return 3.279 * meter;
     }
-
+    /** the main */
     public static void main(String[] args) {
 
         double[] feetValues = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 , 8.0, 9.0, 10.0};
