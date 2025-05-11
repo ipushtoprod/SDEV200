@@ -11,9 +11,9 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     private boolean gameActive = false;
-    private GameGrid opponentGrid, userGrid;
+    private Grid opponentGrid, userGrid;
 
-    private int vesselsToPosition = 5;
+    private int shipsToPosition = 5;
 
     private boolean opponentsTurn = false;
 
@@ -21,19 +21,19 @@ public class Main extends Application {
 
     private Parent buildInterface() {
         BorderPane mainContainer = new BorderPane();
-        mainContainer.setPrefSize(650, 850);
+        mainContainer.setPrefSize(1000, 1000);
 
-        opponentGrid = new GameGrid(true, event -> {
+        opponentGrid = new Grid(true, event -> {
             if (!gameActive)
                 return;
 
-            GameGrid.Tile tile = (GameGrid.Tile) event.getSource();
+            Grid.Tile tile = (Grid.Tile) event.getSource();
             if (tile.isHit)
                 return;
 
             opponentsTurn = !tile.fireAt();
 
-            if (opponentGrid.remainingVessels == 0) {
+            if (opponentGrid.remainingShips == 0) {
                 System.out.println("VICTORY");
                 System.exit(0);
             }
@@ -42,13 +42,13 @@ public class Main extends Application {
                 executeOpponentMove();
         });
 
-        userGrid = new GameGrid(false, event -> {
+        userGrid = new Grid(false, event -> {
             if (gameActive)
                 return;
 
-            GameGrid.Tile tile = (GameGrid.Tile) event.getSource();
-            if (userGrid.positionVessel(new Vessel(vesselsToPosition, event.getButton() == MouseButton.PRIMARY), tile.col, tile.row)) {
-                if (--vesselsToPosition == 0) {
+            Grid.Tile tile = (Grid.Tile) event.getSource();
+            if (userGrid.positionShip(new Ship(shipsToPosition, event.getButton() == MouseButton.PRIMARY), tile.col, tile.row)) {
+                if (--shipsToPosition == 0) {
                     initiateGame();
                 }
             }
@@ -67,13 +67,13 @@ public class Main extends Application {
             int col = randomGenerator.nextInt(12);
             int row = randomGenerator.nextInt(12);
 
-            GameGrid.Tile tile = userGrid.getTile(col, row);
+            Grid.Tile tile = userGrid.getTile(col, row);
             if (tile.isHit)
                 continue;
 
             opponentsTurn = tile.fireAt();
 
-            if (userGrid.remainingVessels == 0) {
+            if (userGrid.remainingShips == 0) {
                 System.out.println("DEFEAT");
                 System.exit(0);
             }
@@ -81,14 +81,14 @@ public class Main extends Application {
     }
 
     private void initiateGame() {
-        int vesselType = 5;
+        int shipType = 5;
 
-        while (vesselType > 0) {
+        while (shipType > 0) {
             int col = randomGenerator.nextInt(12);
             int row = randomGenerator.nextInt(12);
 
-            if (opponentGrid.positionVessel(new Vessel(vesselType, randomGenerator.nextDouble() < 0.5), col, row)) {
-                vesselType--;
+            if (opponentGrid.positionShip(new Ship(shipType, randomGenerator.nextDouble() < 0.5), col, row)) {
+                shipType--;
             }
         }
 
