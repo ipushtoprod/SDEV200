@@ -1,7 +1,9 @@
 import java.util.ArrayList;
 import java.util.List;
+
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
+
 import javafx.scene.Parent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -14,11 +16,12 @@ public class Grid extends Parent {
     private boolean isOpponent = false;
     public int remainingShips = 5;
 
+    // handles mouse listening and attaches stuff for each tile
     public Grid(boolean isOpponent, EventHandler<? super MouseEvent> handler) {
         this.isOpponent = isOpponent;
-        for (int row = 0; row < 12; row++) {
+        for (int row = 0; row < 10; row++) {
             HBox column = new HBox();
-            for (int col = 0; col < 12; col++) {
+            for (int col = 0; col < 10; col++) {
                 Tile t = new Tile(col, row, this);
                 t.setOnMouseClicked(handler);
                 column.getChildren().add(t);
@@ -30,27 +33,28 @@ public class Grid extends Parent {
         getChildren().add(columns);
     }
 
-    public boolean positionShip(Ship ship, int col, int row) {
-        if (canPositionShip(ship, col, row)) {
-            int size = ship.category;
+    //ship placement logic, decreasing ship lengths by one each time a ship is placed. colors tiles when they are filled with a ship.
+    public boolean placeShip(Ship ship, int col, int row) {
+        if (canPlaceShip(ship, col, row)) {
+            int length = ship.length;
 
             if (!ship.horizontal) {
-                for (int i = row; i < row + size; i++) {
+                for (int i = row; i < row + length; i++) {
                     Tile tile = getTile(col, i);
                     tile.ship = ship;
                     if (!isOpponent) {
-                        tile.setFill(Color.LIGHTBLUE);
-                        tile.setStroke(Color.DARKBLUE);
+                        tile.setFill(Color.CYAN);
+                        tile.setStroke(Color.BLACK);
                     }
                 }
             }
             else {
-                for (int i = col; i < col + size; i++) {
+                for (int i = col; i < col + length; i++) {
                     Tile tile = getTile(i, row);
                     tile.ship = ship;
                     if (!isOpponent) {
-                        tile.setFill(Color.LIGHTBLUE);
-                        tile.setStroke(Color.DARKBLUE);
+                        tile.setFill(Color.CYAN);
+                        tile.setStroke(Color.BLACK);
                     }
                 }
             }
@@ -68,6 +72,7 @@ public class Grid extends Parent {
         return (Tile)((HBox)columns.getChildren().get(row)).getChildren().get(col);
     }
 
+    //really questionable way of making sure that ships can't stack, has some issues but it works
     private Tile[] getAdjacentTiles(int col, int row) {
         Point2D[] positions = new Point2D[] {
                 new Point2D(col - 1, row),
@@ -87,11 +92,12 @@ public class Grid extends Parent {
         return adjacentTiles.toArray(new Tile[0]);
     }
 
-    private boolean canPositionShip(Ship ship, int col, int row) {
-        int size = ship.category;
+    //see above
+    private boolean canPlaceShip(Ship ship, int col, int row) {
+        int length = ship.length;
 
         if (!ship.horizontal) {
-            for (int i = row; i < row + size; i++) {
+            for (int i = row; i < row + length; i++) {
                 if (!isPositionValid(col, i))
                     return false;
 
@@ -106,7 +112,7 @@ public class Grid extends Parent {
             }
         }
         else {
-            for (int i = col; i < col + size; i++) {
+            for (int i = col; i < col + length; i++) {
                 if (!isPositionValid(i, row))
                     return false;
 
@@ -129,7 +135,7 @@ public class Grid extends Parent {
     }
 
     private boolean isPositionValid(double col, double row) {
-        return col >= 0 && col < 12 && row >= 0 && row < 12;
+        return col >= 0 && col < 10 && row >= 0 && row < 10;
     }
 
     public class Tile extends Rectangle {
@@ -144,17 +150,17 @@ public class Grid extends Parent {
             this.col = col;
             this.row = row;
             this.grid = grid;
-            setFill(Color.DARKGRAY);
-            setStroke(Color.DARKSLATEGRAY);
+            setFill(Color.WHITE);
+            setStroke(Color.BLACK);
         }
 
         public boolean fireAt() {
             isHit = true;
-            setFill(Color.SLATEGRAY);
+            setFill(Color.BLACK);
 
             if (ship != null) {
                 ship.damage();
-                setFill(Color.ORANGERED);
+                setFill(Color.RED);
                 if (!ship.isOperational()) {
                     grid.remainingShips--;
                 }
